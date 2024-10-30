@@ -1,0 +1,11 @@
+[Unit]
+Description=delphijustin Captive Portal HTTP Script
+After=network.target  # Use if the script needs network access
+
+[Service]
+ExecStart=/bin/bash /usr/local/bin/captive-portal.sh yeshup
+Type=oneshot
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
