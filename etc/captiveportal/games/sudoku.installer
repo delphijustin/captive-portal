@@ -1,0 +1,8 @@
+#!/bin/bash
+if [[ -d "/etc/captiveportal/games/javascript-sudoku" ]]
+then
+echo "That app has already been install"
+exit 2
+fi
+git clone https://github.com/trananhtuat/javascript-sudoku.git /etc/captiveportal/games/javascript-sudoku
+echo 'games.push({"filename":"javascript-sudoku/index.html","caption":"Sudoku");' >> 
