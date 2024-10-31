@@ -19,6 +19,7 @@ read -p "Enter a title for the game: " GAMECAP
 mkdir /etc/captiveportal/games/custom-$GAMEDIR
 cp -rv $1 /etc/captiveportal/games/custom-$GAMEDIR/
 echo "games.push({\"caption\":\"$GAMECAP\",\"filename\":\"custom-$GAMEDIR/$GAMEFILE\"});" >> /etc/captiveportal/games.js
+echo "UNINSTALLCMD=rm -rf /etc/captiveportal/games/custom-$GAMEDIR/*" > /etc/captiveportal/games/custom-$GAMEDIR.installer
 exit 0
 fi
 if [[ -f "/etc/captiveportal/games/$1.installer" ]]
