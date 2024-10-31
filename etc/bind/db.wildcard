@@ -1,0 +1,11 @@
+$TTL 1h
+@   IN  SOA localhost. root.localhost. (
+        2023102801  ; Serial
+        1h          ; Refresh
+        15m         ; Retry
+        1w          ; Expire
+        1h )        ; Minimum TTL
+
+    IN  NS  localhost.
+*   IN  A   [SERVER_LOCAL_IP]
+
