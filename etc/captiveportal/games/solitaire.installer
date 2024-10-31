@@ -1,0 +1,3 @@
+#!/bin/bash
+git clone https://github.com/pharrington/Solitairey.git /etc/captiveportal/games/Solitairey
+echo "games.push({\"caption\":\"Solitaire Cardgames\",\"Solitairey/index.html\"});" >> /etc/captiveportal/games.js
