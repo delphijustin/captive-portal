@@ -6,6 +6,7 @@ exit 0
 fi
 if [[ "$1" == "http" ]]
 then
+source /etc/captiveportal/config
 read method query protocol
 accesstime=$(date)
 echo "[$accesstime] $NCAT_REMOTE_ADDR $method $query $protocol" >> /etc/captiveportal/query.log
@@ -21,11 +22,21 @@ exit 0
 fi
 echo "HTTP/1.0 200 OK"
 arpinfo=$(arp | grep "$NCAT_REMOTE_ADDR")
+if [[ "$query" == "/favicon.ico" ]]
+then
+echo "Content-type: image/x-icon"
+contentLength=$(stat -c%s /etc/captiveportal/favicon.ico)
+echo "Content-length: $contentLength"
+echo ""
+cat /etc/captiveportal/favicon.ico
+exit 0
+fi
 if [[ "$query" == "/ipinfo.js" ]]
 then
 echo "Content-type: text/javascript"
 echo ""
 echo "document.writeln(\"$arpinfo\");"
+echo "const portalip=\"$portalip\";"
 exit 0
 fi
 if [[ "$query" == "/logo.gif" ]]
@@ -58,6 +69,19 @@ fi
 if [[ "$query" == "/games/"* ]]
 then
 mime=text/html
+if [[ -d "/etc/captiveportal$query" ]]
+then
+echo "Content-type: $mime"
+echo ""
+echo "<!DOCTYPE html><html><body><ul>"
+listing=$(ls "/etc/captiveportal$query" -1)
+IFS=$'\n' read -rd '' -a array <<< "$listing"
+for filename in "${array[@]}"; do
+    echo "<li><a href=\"$filename\">$filename</a></li>"
+done
+echo "</ul></body></html>"
+exit 0
+fi
 if [[ "$query" == *".js" ]]
 then
 mime=text/javascript
@@ -79,7 +103,7 @@ then
 mime=image/jpeg
 fi
 echo "Content-type: $mime"
-contentLength=$(stat -c%s /etc/captiveportal$query)
+contentLength=$(stat-c%s /etc/captiveportal$query)
 echo "Content-length: $contentLength"
 echo ""
 cat /etc/captiveportal$query
