@@ -25,14 +25,14 @@ fi
 if [[ -f "/etc/captiveportal/games/$1.installer" ]]
 then
 source /etc/captiveportal/games/$1.installer
-if [[ -d $GAMEDIR ]]
+if [[ -d "/etc/captiveportal/games/$GAMEDIR" ]]
 then
 read -p "Type YES in uppercase letters to remove game: $1"
 $UNINSTALLCMD
 exit 2
 fi
 $INSTALLCMD
-echo "game.push({\"caption\":\"$GAMECAP\",\"filename\":\"$GAMEDIR$/GAMEFILE\"});" >> /etc/captiveportal/games.js
+echo "game.push({\"caption\":\"$GAMECAP\",\"filename\":\"$GAMEDIR/$GAMEFILE\"});" >> /etc/captiveportal/games.js
 fi
 exit 0
 fi
