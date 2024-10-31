@@ -10,7 +10,6 @@ Heres a list of the following games:<br>
   <li>sudoku</li>
   <li>solitaire</li>
   <li>calculator</li>
-  <li>paint</li>
 </ul>
 for example to install sudoku type:<br>
 sudo offline-game.sh sudoku
