@@ -2,4 +2,4 @@ INSTALLCMD=git clone https://github.com/iamkanhaiya/jscalculator/ /etc/captivepo
 GAMECAP=Calculator
 GAMEDIR=calculator
 GAMEFILE=calculator.html.html
-UNINSTALLCMD=rm -rf /etc/captiveportal/games/calculator
+UNINSTALLCMD=rm -rf /etc/captiveportal/games/calculator/*
