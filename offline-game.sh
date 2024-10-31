@@ -32,7 +32,7 @@ $UNINSTALLCMD
 exit 2
 fi
 $INSTALLCMD
-echo "game.push({\"caption\":\"$GAMECAP\",\"filename\":\"$GAMEDIR/$GAMEFILE\"});" >> /etc/captiveportal/games.js
+echo "games.push({\"caption\":\"$GAMECAP\",\"filename\":\"$GAMEDIR/$GAMEFILE\"});" >> /etc/captiveportal/games.js
 fi
 exit 0
 fi
