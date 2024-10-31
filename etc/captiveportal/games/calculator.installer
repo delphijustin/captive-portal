@@ -1,3 +1,5 @@
-#!/bin/bash
-git clone https://github.com/iamkanhaiya/jscalculator/ /etc/captiveportal/games/calculator
-echo "games.push({\"caption\":\"Calculator\",\"filename\":\"calculator/calculator.html.html\"});" >> /etc/captiveportal/games.js
+INSTALLCMD=git clone https://github.com/iamkanhaiya/jscalculator/ /etc/captiveportal/games/calculator
+GAMECAP=Calculator
+GAMEDIR=calculator
+GAMEFILE=calculator.html.html
+UNINSTALLCMD=rm -rf /etc/captiveportal/games/calculator
