@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="robots" content="noindex, nofollow">
+<style>
+#nogames{
+display:none;
+}
+</style>
+<script src="/games.js"></script>
+<script>
+function StartUp(){
+if(games.length==0){
+document.getElementById("nogames").style.display="inline";
+}
+games.forEach(function(game){
+document.getElementById("games").innerHTML+='<li><a href="//'+portalip+'/games/'+game.filename+'">'+game.caption+'</a></li>';
+});
+document.getElementById("ref").src="/log/"+location.href;
+}
+</script>
+</head>
+<body onload="StartUp()">
+<center><img src="/logo.gif" height="255px" width="255px"><p>
+You do not have full internet access yet.</p></center>
+<p>However here's a list of games you can play:
+<div id="nogames">No games installed yet</div>
+<noscript>Javascript is required to play games</noscript>
+<ul id="games"></ul></p><p>
+If this was a mistake you can provide the network administrator with the followinig info:<br>
+<script src="/ipinfo.js"></script>
+</p>
+<img id="ref" src="/null.gif">
+</body>
+</html>
