@@ -1,3 +1,5 @@
-#!/bin/bash
-git clone https://github.com/trananhtuat/javascript-sudoku.git /etc/captiveportal/games/javascript-sudoku
-echo 'games.push({"filename":"javascript-sudoku/index.html","caption":"Sudoku");' >> /etc/captiveportal/games.js
+INSTALLCMD=git clone https://github.com/trananhtuat/javascript-sudoku.git /etc/captiveportal/games/javascript-sudoku
+GAMEFILE=index.html
+GAMECAP=Sudoku
+GAMEDIR=javascript-sudoku
+UNINSTALLCMD=rm -rf /etc/captiveportal/games/javascript-sudoku/*
