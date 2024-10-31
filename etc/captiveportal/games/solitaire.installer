@@ -1,3 +1,5 @@
-#!/bin/bash
-git clone https://github.com/pharrington/Solitairey.git /etc/captiveportal/games/Solitairey
-echo "games.push({\"caption\":\"Solitaire Cardgames\",\"Solitairey/index.html\"});" >> /etc/captiveportal/games.js
+INSTALLCMD=git clone https://github.com/pharrington/Solitairey.git /etc/captiveportal/games/Solitairey
+GAMECAP=Solitaire Cardgames
+GAMEFILE=index.html
+GAMEDIR=Solitarey
+UNINSTALLCMD=rm -rf /etc/captiveportal/games/Solitarey/*
