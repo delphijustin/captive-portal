@@ -8,7 +8,7 @@ exit 0
 fi
 if [[ -d "$1" ]]
 then
-GAMEDIR=user-$RANDOM-$RANDOM-$RANDOM-$RANDOM
+GAMEDIR=$RANDOM-$RANDOM-$RANDOM-$RANDOM
 read -p "Enter the HTML filename of the game : " GAMEFILE
 if [[ "$GAMEFILE" == "$1"* ]]
 echo "The game file cannot be in $1"
