@@ -1,15 +1,11 @@
-Configuration files go here
-<br>
-To install a game type in<br>
-sudo offline-game.sh <b>name</b>
-<p>
-  The game will be install from github
-</p>
-Heres a list of the following games:<br>
+Configuration files go here:
 <ul>
-  <li>sudoku</li>
-  <li>solitaire</li>
-  <li>calculator</li>
-</ul>
-for example to install sudoku type:<br>
-sudo offline-game.sh sudoku
+  <li>games.js - installed game configuration file</li>
+  <li>config - main config file</li>
+  <li>blockpage.html - blocked webpage</li>
+  <li>logo.gif - Your company logo</li>
+  <li>null.gif - blank picture used for logging website name</li>
+  <li>favicon.ico - server favicon</li>
+  <li>forbidden.html - forbidden webpage</li>
+  <li>games/ - games directory anything here will be avalible for access through the /games/ root on the server</li>
+</hl>
