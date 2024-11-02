@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
+<title>Captive Portal</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="robots" content="noindex, nofollow">
 <style>
 #nogames{
@@ -8,6 +12,7 @@ display:none;
 }
 </style>
 <script src="/games.js"></script>
+<script src="jquery.min.js"></script>
 <script>
 function StartUp(){
 if(games.length==0){
@@ -16,7 +21,12 @@ document.getElementById("nogames").style.display="inline";
 games.forEach(function(game){
 document.getElementById("games").innerHTML+='<li><a href="//'+portalip+'/games/'+game.filename+'">'+game.caption+'</a></li>';
 });
-document.getElementById("ref").src="/log/"+location.href;
+logArray.push(location.href);
+logArray.push("referrerURL:");
+logArray.push(document.referrer);
+$.post("/log/"+logArray.join("/"), {}, function(response) {
+console.log("CaptivePortal: "+response);
+});
 }
 </script>
 </head>
@@ -30,6 +40,5 @@ You do not have full internet access yet.</p></center>
 If this was a mistake you can provide the network administrator with the followinig info:<br>
 <script src="/ipinfo.js"></script>
 </p>
-<img id="ref" src="/null.gif">
 </body>
 </html>
