@@ -7,5 +7,3 @@ $TTL 1h
         1h )        ; Minimum TTL
 
     IN  NS  localhost.
-*   IN  A   [SERVER_LOCAL_IP]
-
