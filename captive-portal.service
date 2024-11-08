@@ -3,7 +3,7 @@ Description=delphijustin Captive Portal HTTP Script
 After=network.target  # Use if the script needs network access
 
 [Service]
-ExecStart=/bin/bash /usr/local/bin/captive-portal.sh yeshup
+ExecStart=/bin/bash /usr/local/bin/captive-portal.sh httpd
 Type=oneshot
 RemainAfterExit=yes
 
