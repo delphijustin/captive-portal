@@ -1,5 +1,0 @@
-INSTALLCMD=git clone https://github.com/pharrington/Solitairey.git /etc/captiveportal/games/Solitairey
-GAMECAP=Solitaire Cardgames
-GAMEFILE=index.html
-GAMEDIR=Solitarey
-UNINSTALLCMD=rm -rf /etc/captiveportal/games/Solitarey/*
