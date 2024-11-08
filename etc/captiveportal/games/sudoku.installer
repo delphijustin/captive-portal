@@ -1,5 +1,0 @@
-INSTALLCMD=git clone https://github.com/trananhtuat/javascript-sudoku.git /etc/captiveportal/games/javascript-sudoku
-GAMEFILE=index.html
-GAMECAP=Sudoku
-GAMEDIR=javascript-sudoku
-UNINSTALLCMD=rm -rf /etc/captiveportal/games/javascript-sudoku/*
