@@ -1,33 +1,122 @@
 #!/bin/bash
-
+source /etc/captiveportal/config
+if [[ "$4" == *"w"* ]]
+then
+echo "<pre>"
+fi
 # Function to check if a rule exists
 rule_exists() {
     iptables -S FORWARD | grep -q "$1"
 }
-
-# If the first argument is "DROP", add the DROP all rule if it doesn't exist
-if [[ "$1" == "DROP" ]]; then
-    if rule_exists "-j DROP"; then
-        echo "DROP all rule already exists."
-    else
-        iptables -A FORWARD -j DROP
-        echo "Added DROP all rule to the FORWARD chain."
-    fi
-    exit 0
+if [[ "$2" == "DELETE" ]]
+then
+if [[ "$1" != "NULL" ]]
+then
+for CHAIN in INPUT FORWARD OUTPUT; do
+    iptables -L $CHAIN -v --line-numbers | grep "$1" | awk '{print $1}' | sort -rn | while read -r NUM; do
+        iptables -D $CHAIN "$NUM"
+    done
+done
 fi
-
+named_ips=$(cat /etc/captiveportal/unblocked-list| grep -v "$3;")
+echo "$named_ips" > /etc/captiveportal/unblocked-list
+cat /etc/captiveportal/named.conf.header /etc/captiveportal/unblocked-list /etc/captiveportal/named.conf.footer > /etc/bind/named.conf.local
+systemctl restart named
+dnsmasq_conf=$(cat /etc/dnsmasq.conf | grep -v "dhcp-host=$1,$3,")
+echo "$dnsmasq_conf" > /etc/dnsmasq.conf
+systemctl restart dnsmasq
+systemctl daemon-reload
+exit 0
+fi
 # Check if MAC address and action are provided
 if [[ -n "$1" && -n "$2" ]]; then
     # Check if the MAC address rule already exists in iptables
     if rule_exists "$1"; then
-        echo "MAC address $1 is already whitelisted."
+        echo "MAC address $1 is already whitelisted.</pre>"
     else
+	if [[ "$features" == *"iptables"* ]]
+	then
         echo "MAC address $1 does not exist, adding rule."
         iptables -I FORWARD -m mac --mac-source "$1" -j "$2"
         echo "Rule added for MAC $1 with action $2."
+	fi
+	if [[ "$2" == "DROP" ]]
+	then
+	exit 0
+	fi
+	if [[ "$3" != "" ]]
+	then
+	if [[ "$features" == *"dnsmasq-dhcp"* ]]
+	then
+	cat /etc/dnsmasq.conf | grep -q "dhcp-host=$1"
+	if [[ "$?" == "0" ]]
+	then
+	echo "MAC is already whitelisted"
+	exit 1
+	fi
+	cat /etc/dnsmasq.conf | grep -q ",$3,"
+	if [[ "$?" == "0" ]]
+	then
+	systemctl daemon-reload
+	echo "IP is already whitelisted"
+	exit 1
+	fi
+	cp /etc/dnsmasq.conf /etc/captiveportal/
+	cp /etc/bind/named.conf.local /etc/captiveportal/
+	touch /etc/captiveportal/unblocked-list
+	cp /etc/captiveportal/unblocked-list /etc/captiveportal/unblocked-list.old
+	echo "$3;" >> /etc/captiveportal/unblocked-list
+	cat /etc/captiveportal/named.conf.header /etc/captiveportal/unblocked-list /etc/captiveportal/named.conf.footer > /etc/bind/named.conf.local
+	systemctl restart named
+	systemctl daemon-reload
+	if [[ "$?" != "0" ]]
+	then
+	echo "BIND Failed"
+	cp /etc/captiveportal/unblocked-list.old /etc/captiveportal/unblocked-list
+	cat /etc/captiveportal/named.conf.header /etc/captiveportal/unblocked-list.old /etc/captiveportal/named.conf.footer > /etc/bind/named.conf.local
+	systemctl restart named
+	systemctl daemon-reload
+	if [[ "$4" == *"w"* ]]
+	then
+	echo "</pre>"
+	exit 1
+	fi
+	fi
+	echo "dhcp-host=$1,$3,$leasetime" >> /etc/dnsmasq.conf
+	systemctl restart dnsmasq
+	if [[ "$?" != "0" ]]
+	then
+	cat /etc/captiveportal/named.conf.header /etc/captiveportal/unblocked-list.old /etc/captiveportal/named.conf.footer > /etc/bind/named.conf.local
+	cp /etc/captiveportal/dnsmasq.conf /etc/
+	systemctl restart dnsmasq
+	systemctl restart named
+	echo "DNSMASQ Failed"
+	if [[ "$4" == *"w"* ]]
+	then
+	echo "</pre>"
+	fi
+	exit 1
+	else
+	echo "DNSMASQ-Success"
+	netfilter-persistent save >/dev/null 2>&1
+	netfilter-persistent reload
+	if [[ "$?" == "0" ]] then
+	echo "Persistent: Success"
+	else
+	echo "Persistent: Failed"
+	fi
+	if [[ "$4" == *"w"* ]]
+	then
+	echo "</pre><p>Welcome</p><input type=\"button\" value=\"Browse the internet\" onclick=\"browseTheWeb()\">"
+	fi
+	fi
+	fi
+	fi
     fi
 else
-    echo "Usage: $0 <MAC address> <ACTION>"
-    echo "Example: $0 aa:bb:cc:dd:ee:ff ACCEPT"
+    echo "Usage: $0 <MAC address> <ACTION> [IP_ADDRESS]"
+    echo "Example: $0 aa:bb:cc:dd:ee:ff ACCEPT 192.168.4.1"
+    echo ""
+    echo "Supported actions: ACCEPT,DROP,DELETE"
     exit 1
 fi
