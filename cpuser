@@ -1,0 +1,105 @@
+#!/bin/bash
+inputPassword(){
+read -sp "Enter new password: " cppass0
+echo ""
+read -sp "Retype password: " cppass1
+echo ""
+if [[ "$cppass0" != "$cppass1" ]]
+then
+echo "Passwords don't match."
+inputPassword
+fi
+if [[ "$cppass0$cppass1" == "" ]]
+then
+echo "No password given, aborting..."
+exit 1
+else
+$0 $cpusr $cppass $options
+exit 0
+fi
+}
+promptUser(){
+options="r"
+if [[ "$1" == "" ]]
+then
+read -p "Username[$SUDO_USER]: " cpusr
+else
+cpusr=$1
+fi
+if [[ "$cpusr" == "" ]]
+then
+cpusr=$SUDO_USER
+fi
+prompted=1
+}
+help(){
+echo "Manages usernames and passwords for captiveportal"
+echo "Usage: $0 [username] [password] [options]"
+echo "Options:"
+echo "r         Replace account"
+echo "d         Delete account(password parameter should be .)"
+echo ""
+echo "If username and/or password are not provided you will be prompted to provide one"
+exit 1
+}
+if [[ "$1" == "-h" ]]
+then
+help
+fi
+if [[ "$1" == "--help" ]]
+then
+help
+fi
+if [[ "$1" == "/?" ]]
+then
+help
+fi
+prompted=0
+options=$3
+touch /etc/captiveportal/users
+if [[ "$1" == "" ]]
+then
+cpusr=$SUDO_USER
+promptUser
+else
+cpusr=$1
+fi
+uname=$(echo -n "$cpusr" |base64)
+grep "^$uname/" /etc/captiveportal/users > /dev/null
+if [[ "$?" == "0" ]]
+then
+echo "User already exists"
+if [[ "$prompted" == "0" ]]
+then
+exit 1
+else
+read -p "Type YES in uppercase: " choice
+if [[ "$choice" != "YES" ]]
+then
+echo "User aborted"
+exit 0
+else
+options=r
+fi
+fi
+fi
+cppass=$2
+if [[ "$2" == "" ]] then
+inputPassword
+fi
+if [[ "$options" == *"r"* ]]
+then
+userlist=$(grep -v "^$uname/" /etc/captiveportal/users)
+echo "$userlist" > /etc/captiveportal/users
+fi
+if [[ "$options" == *"d"* ]]
+then
+userlist=$(grep -v "^$uname/" /etc/captiveportal/users)
+echo "$userlist" > /etc/captiveportal/users
+exit 0
+fi
+pword=$(echo -n "$cppass" |base64)
+if [[ "$options" != *"d"* ]]
+then
+echo "$uname/$pword" >> /etc/captiveportal/users
+fi

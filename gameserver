@@ -1,0 +1,33 @@
+#!/bin/bash
+mkdir /etc/captiveportal/games/
+echo "This will host the following games:"
+echo " * Sudoku https://github.com/trananhtuat/javascript-sudoku"
+echo " * Solitaire https://github.com/pharrington/Solitairey"
+echo " * Video Poker https://github.com/the-codepunker/Javascript-Video-Poker"
+echo "This allows anyone that access your wifi or ethernet network to have fun but have no Internet"
+echo ""
+echo "All games are stored in /etc/captiveportal/games/"
+echo "Any file in that folder can be downloaded"
+read -p "Type YES in uppercase letters: " choice
+if [[ "$choice" != "YES" ]]
+then
+echo "Games installation aborted by user"
+exit 1
+fi
+git clone https://github.com/the-codepunker/Javascript-Video-Poker.git /etc/captiveportal/games/VideoPoker
+if [[ "$?" == "0" ]]
+then
+echo "games.push({\"caption\":\"Video Poker\",\"filename\":\"VideoPoker/index.html\"});" >> /etc/captiveportal/games.js
+fi
+git clone https://github.com/pharrington/Solitairey.git /etc/captiveportal/games/Solitairey
+if [[ "$?" == "0" ]]
+then
+echo "games.push({\"caption\":\"Solitaire Cardgames\",\"filename\":\"Solitairey/index.html\"});" >> /etc/captiveportal/games.js
+fi
+git clone https://github.com/trananhtuat/javascript-sudoku.git /etc/captiveportal/games/javascript-sudoku
+if [[ "$?" == "0" ]]
+then
+echo "games.push({\"caption\":\"Sudoku\",\"filename\":\"javascript-sudoku/index.html\"});" >> /etc/captiveportal/games.js
+fi
+echo "Game server has the following games:"
+ls /etc/captiveportal/games/
