@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Captive Portal</title>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -12,33 +11,27 @@ display:none;
 }
 </style>
 <script src="/games.js"></script>
-<script src="jquery.min.js"></script>
 <script>
 function StartUp(){
 if(games.length==0){
-document.getElementById("nogames").style.display="inline";
+document.getElementById("nogames").style.display="block";
 }
 games.forEach(function(game){
 document.getElementById("games").innerHTML+='<li><a href="//'+portalip+'/games/'+game.filename+'">'+game.caption+'</a></li>';
-});
-logArray.push(location.href);
-logArray.push("referrerURL:");
-logArray.push(document.referrer);
-$.post("/log/"+logArray.join("/"), {}, function(response) {
-console.log("CaptivePortal: "+response);
 });
 }
 </script>
 </head>
 <body onload="StartUp()">
 <center><img src="/logo.gif" height="255px" width="255px"><p>
-You do not have full internet access yet.</p></center>
-<p>However here's a list of games you can play:
+<span id="error">
+You don't have full internet access yet.
+</span></p></center>
+<p id="gamehint">However here's a list of games you can play:
 <div id="nogames">No games installed yet</div>
-<noscript>Javascript is required to play games</noscript>
-<ul id="games"></ul></p><p>
+<ul id="games"></ul></p>
+<p id="adminDetails">
 If this was a mistake you can provide the network administrator with the followinig info:<br>
-<script src="/ipinfo.js"></script>
-</p>
+<script src="/ipinfo.js"></script></p>
 </body>
 </html>
