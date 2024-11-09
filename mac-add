@@ -1,122 +1,105 @@
 #!/bin/bash
-source /etc/captiveportal/config
-if [[ "$4" == *"w"* ]]
+inputPassword(){
+read -sp "Enter new password: " cppass0
+echo ""
+read -sp "Retype password: " cppass1
+echo ""
+if [[ "$cppass0" != "$cppass1" ]]
 then
-echo "<pre>"
+echo "Passwords don't match."
+inputPassword
 fi
-# Function to check if a rule exists
-rule_exists() {
-    iptables -S FORWARD | grep -q "$1"
-}
-if [[ "$2" == "DELETE" ]]
+if [[ "$cppass0$cppass1" == "" ]]
 then
-if [[ "$1" != "NULL" ]]
-then
-for CHAIN in INPUT FORWARD OUTPUT; do
-    iptables -L $CHAIN -v --line-numbers | grep "$1" | awk '{print $1}' | sort -rn | while read -r NUM; do
-        iptables -D $CHAIN "$NUM"
-    done
-done
-fi
-named_ips=$(cat /etc/captiveportal/unblocked-list| grep -v "$3;")
-echo "$named_ips" > /etc/captiveportal/unblocked-list
-cat /etc/captiveportal/named.conf.header /etc/captiveportal/unblocked-list /etc/captiveportal/named.conf.footer > /etc/bind/named.conf.local
-systemctl restart named
-dnsmasq_conf=$(cat /etc/dnsmasq.conf | grep -v "dhcp-host=$1,$3,")
-echo "$dnsmasq_conf" > /etc/dnsmasq.conf
-systemctl restart dnsmasq
-systemctl daemon-reload
+echo "No password given, aborting..."
+exit 1
+else
+$0 $cpusr $cppass $options
 exit 0
 fi
-# Check if MAC address and action are provided
-if [[ -n "$1" && -n "$2" ]]; then
-    # Check if the MAC address rule already exists in iptables
-    if rule_exists "$1"; then
-        echo "MAC address $1 is already whitelisted.</pre>"
-    else
-	if [[ "$features" == *"iptables"* ]]
-	then
-        echo "MAC address $1 does not exist, adding rule."
-        iptables -I FORWARD -m mac --mac-source "$1" -j "$2"
-        echo "Rule added for MAC $1 with action $2."
-	fi
-	if [[ "$2" == "DROP" ]]
-	then
-	exit 0
-	fi
-	if [[ "$3" != "" ]]
-	then
-	if [[ "$features" == *"dnsmasq-dhcp"* ]]
-	then
-	cat /etc/dnsmasq.conf | grep -q "dhcp-host=$1"
-	if [[ "$?" == "0" ]]
-	then
-	echo "MAC is already whitelisted"
-	exit 1
-	fi
-	cat /etc/dnsmasq.conf | grep -q ",$3,"
-	if [[ "$?" == "0" ]]
-	then
-	systemctl daemon-reload
-	echo "IP is already whitelisted"
-	exit 1
-	fi
-	cp /etc/dnsmasq.conf /etc/captiveportal/
-	cp /etc/bind/named.conf.local /etc/captiveportal/
-	touch /etc/captiveportal/unblocked-list
-	cp /etc/captiveportal/unblocked-list /etc/captiveportal/unblocked-list.old
-	echo "$3;" >> /etc/captiveportal/unblocked-list
-	cat /etc/captiveportal/named.conf.header /etc/captiveportal/unblocked-list /etc/captiveportal/named.conf.footer > /etc/bind/named.conf.local
-	systemctl restart named
-	systemctl daemon-reload
-	if [[ "$?" != "0" ]]
-	then
-	echo "BIND Failed"
-	cp /etc/captiveportal/unblocked-list.old /etc/captiveportal/unblocked-list
-	cat /etc/captiveportal/named.conf.header /etc/captiveportal/unblocked-list.old /etc/captiveportal/named.conf.footer > /etc/bind/named.conf.local
-	systemctl restart named
-	systemctl daemon-reload
-	if [[ "$4" == *"w"* ]]
-	then
-	echo "</pre>"
-	exit 1
-	fi
-	fi
-	echo "dhcp-host=$1,$3,$leasetime" >> /etc/dnsmasq.conf
-	systemctl restart dnsmasq
-	if [[ "$?" != "0" ]]
-	then
-	cat /etc/captiveportal/named.conf.header /etc/captiveportal/unblocked-list.old /etc/captiveportal/named.conf.footer > /etc/bind/named.conf.local
-	cp /etc/captiveportal/dnsmasq.conf /etc/
-	systemctl restart dnsmasq
-	systemctl restart named
-	echo "DNSMASQ Failed"
-	if [[ "$4" == *"w"* ]]
-	then
-	echo "</pre>"
-	fi
-	exit 1
-	else
-	echo "DNSMASQ-Success"
-	netfilter-persistent save >/dev/null 2>&1
-	netfilter-persistent reload
-	if [[ "$?" == "0" ]] then
-	echo "Persistent: Success"
-	else
-	echo "Persistent: Failed"
-	fi
-	if [[ "$4" == *"w"* ]]
-	then
-	echo "</pre><p>Welcome</p><input type=\"button\" value=\"Browse the internet\" onclick=\"browseTheWeb()\">"
-	fi
-	fi
-	fi
-	fi
-    fi
+}
+promptUser(){
+options="r"
+if [[ "$1" == "" ]]
+then
+read -p "Username[$SUDO_USER]: " cpusr
 else
-    echo "Usage: $0 <MAC address> <ACTION> [IP_ADDRESS]"
-    echo "Example: $0 aa:bb:cc:dd:ee:ff ACCEPT 192.168.4.1"
-    echo ""
-    echo "Supported actions: ACCEPT,DROP,DELETE"
-    exit 1
+cpusr=$1
+fi
+if [[ "$cpusr" == "" ]]
+then
+cpusr=$SUDO_USER
+fi
+prompted=1
+}
+help(){
+echo "Manages usernames and passwords for captiveportal"
+echo "Usage: $0 [username] [password] [options]"
+echo "Options:"
+echo "r         Replace account"
+echo "d         Delete account(password parameter should be .)"
+echo ""
+echo "If username and/or password are not provided you will be prompted to provide one"
+exit 1
+}
+if [[ "$1" == "-h" ]]
+then
+help
+fi
+if [[ "$1" == "--help" ]]
+then
+help
+fi
+if [[ "$1" == "/?" ]]
+then
+help
+fi
+prompted=0
+options=$3
+touch /etc/captiveportal/users
+if [[ "$1" == "" ]]
+then
+cpusr=$SUDO_USER
+promptUser
+else
+cpusr=$1
+fi
+uname=$(echo -n "$cpusr" |base64)
+grep "^$uname/" /etc/captiveportal/users > /dev/null
+if [[ "$?" == "0" ]]
+then
+echo "User already exists"
+if [[ "$prompted" == "0" ]]
+then
+exit 1
+else
+read -p "Type YES in uppercase: " choice
+if [[ "$choice" != "YES" ]]
+then
+echo "User aborted"
+exit 0
+else
+options=r
+fi
+fi
+fi
+cppass=$2
+if [[ "$2" == "" ]] then
+inputPassword
+fi
+if [[ "$options" == *"r"* ]]
+then
+userlist=$(grep -v "^$uname/" /etc/captiveportal/users)
+echo "$userlist" > /etc/captiveportal/users
+fi
+if [[ "$options" == *"d"* ]]
+then
+userlist=$(grep -v "^$uname/" /etc/captiveportal/users)
+echo "$userlist" > /etc/captiveportal/users
+exit 0
+fi
+pword=$(echo -n "$cppass" |base64)
+if [[ "$options" != *"d"* ]]
+then
+echo "$uname/$pword" >> /etc/captiveportal/users
 fi
