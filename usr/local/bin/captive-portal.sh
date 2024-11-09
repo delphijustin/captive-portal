@@ -126,9 +126,7 @@ echo "Content-type: text/plain"
 echo ""
 touch /etc/captiveportal/hosts.domains
 hostquery="${query//\portalhost\//}"
-mapfile blacklist < /etc/captiveportal/hosts.domains
-for hline in "${blacklist[@]}"; do
-if [[ "$hline" == "$hostquery" ]]
+if [[ -f "/etc/captiveportal/zones/$hostquery.conf" ]]
 then
 echo -n "Blocked"
 exit 0
