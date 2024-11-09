@@ -1,0 +1,10 @@
+
+};
+
+view "internet-access" {
+    match-clients { "whitelisted-clients"; };
+    recursion yes;
+    # Use forwarders if desired for internet resolution
+    forwarders {
+        9.9.9.9;
+    };
