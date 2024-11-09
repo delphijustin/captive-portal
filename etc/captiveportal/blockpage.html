@@ -11,7 +11,9 @@ display:none;
 }
 </style>
 <script src="/games.js"></script>
+<script src="/jquery.js"></script>
 <script>
+const siteCategory=new Array("Ads","Porn","Unknown");
 var wanWorking=false;
 function StartUp(){
 if(games.length==0){
@@ -20,7 +22,16 @@ document.getElementById("nogames").style.display="block";
 games.forEach(function(game){
 document.getElementById("games").innerHTML+='<li><a href="//'+portalip+'/games/'+game.filename+'">'+game.caption+'</a></li>';
 });
-if(wanWorking)document.getElementByid("error").innerHTML="You are online";
+if(wanWorking)
+  document.getElementByid("error").innerHTML="You are online";
+$.get("/portalhost/"+location.host,function(category){
+if(category>-1){
+  document.getElementById("error").innerHTML="This website is blocked";
+  document.getElementById("adminDetails").innerHTML+="<br>Website: "+location.host+" Category: "+siteCategory[category];
+  document.getElementById("gamehint").style.display="none";
+  document.getElementById("nogames").style.display="none";
+  document.getElementById("games").style.display="none";
+});
 }
 </script>
 <script src="//80.209.231.50/success.php"></script>
