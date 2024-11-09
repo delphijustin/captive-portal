@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+<head>
+<title>CaptivePortal Log</title>
+<style>
+.entry{display:none;}
+</style>
+<script>
+function toggleEntry(x){
+var entry=document.getElementById("entry"+x);
+if(entry.style.display=="none"){
+entry.style.display="block";
+return;
+}
+entry.style.display="none";
+}
+</script>
+<body>
