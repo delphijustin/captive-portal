@@ -131,7 +131,6 @@ then
 echo -n "Blocked"
 exit 0
 fi
-done
 echo -n "Unblocked"
 exit 0
 fi
