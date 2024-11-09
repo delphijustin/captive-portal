@@ -20,14 +20,17 @@ document.getElementById("nogames").style.display="block";
 games.forEach(function(game){
 document.getElementById("games").innerHTML+='<li><a href="//'+portalip+'/games/'+game.filename+'">'+game.caption+'</a></li>';
 });
-$.get("/portalhost/"+location.hostname,function(grepCode){
-if(grepCode=="0"){
-  document.getElementById("error").innerHTML="This website is blocked";
-  document.getElementById("adminDetails").innerHTML+="<br>Website: "+location.hostname;
-  document.getElementById("gamehint").style.display="none";
-  document.getElementById("nogames").style.display="none";
-  document.getElementById("games").style.display="none";
+$.get("/portalhost/"+location.hostname,function(status){
+if(status=="Blocked"){
+document.getElementById("error").innerHTML="Website is blocked";
+document.getElementById("adminDetails").innerHTML+=" Hostname: "+location.hostname;
+document.getElementById("games").style.display="none";
+document.getElementById("nogames").style.display="none";
+document.getElementById("gamehint").style.display="none";
+return;
 }
+if(status=="Unblocked")return;
+console.log("Unknown block status: "+status);
 });
 }
 </script>
