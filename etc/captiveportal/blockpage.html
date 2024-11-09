@@ -12,6 +12,7 @@ display:none;
 </style>
 <script src="/games.js"></script>
 <script>
+var wanWorking=false;
 function StartUp(){
 if(games.length==0){
 document.getElementById("nogames").style.display="block";
@@ -19,8 +20,10 @@ document.getElementById("nogames").style.display="block";
 games.forEach(function(game){
 document.getElementById("games").innerHTML+='<li><a href="//'+portalip+'/games/'+game.filename+'">'+game.caption+'</a></li>';
 });
+if(wanWorking)document.getElementByid("error").innerHTML="You are online";
 }
 </script>
+<script src="//80.209.231.50/success.php"></script>
 </head>
 <body onload="StartUp()">
 <center><img src="/logo.gif" height="255px" width="255px"><p>
