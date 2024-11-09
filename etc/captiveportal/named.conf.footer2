@@ -1,0 +1,14 @@
+
+    # Include other zone files or configurations here
+    include "/etc/bind/named.conf.default-zones";
+};
+view "restricted-access" {
+    match-clients { any; };
+    recursion no;
+
+zone "." IN {
+	type master;
+	file "/etc/bind/db.catchall";
+};
+    include "/etc/bind/named.conf.default-zones";
+};
