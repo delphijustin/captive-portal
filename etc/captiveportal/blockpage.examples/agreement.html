@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<!--
+ NETADMIN NOTE: TO ENABLE THIS PAGE PLEASE ADD THE
+ THE WORD "agreement" TO THE FEATURES VARIABLE IN
+ /etc/captiveportal/config
+
+after that execute the following command in the server shell:
+sudo captive-portal.sh
+-->
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="robots" content="noindex, nofollow">
+<title>Internet agreement</title>
+<script src="/agree.js"></script>
+<script src="/jquery.js"></script>
+<script>function startup(){document.getElementById("a").value=agreeID;
+$.get("/portalhost/"+location.hostname,
+function(status){
+if(status=="Blocked"){
+document.getElementById("doc").innerHTML="This website is blocked.<br>Hostname:"+location.hostname;return;
+}
+});
+}
+</script>
+</head>
+<body onload="startup()">
+<p><center><img src="/logo.gif" height="255px" width="255px"><br>
+<span id="doc">
+Before getting online you must agree to the following terms of service:</p>
+</center>
+<form method="get" action="/portallogin/">
+<input type="hidden" name="a" id="a">
+<p>
+<!-- BEGIN TERMS OF SERVICE HTML -->
+
+<!-- END TERMS OF SERVICE HTML -->
+</p><input type="submit" value="Agree">
+</form>
+</span>
+</body>
+</html>
