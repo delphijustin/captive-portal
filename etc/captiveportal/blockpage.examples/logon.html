@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<style>
+#nogames{
+display:none;
+}
+</style>
+<script src="/jquery.js"></script>
+<script src="/games.js"></script>
+<script>
+function StartUp(){
+if(games.length==0){
+document.getElementById("nogames").style.display="block";
+}
+games.forEach(function(game){
+document.getElementById("games").innerHTML+='<li><a href="//'+portalip+'/games/'+game.filename+'">'+game.caption+'</a></li>';
+});
+$.get("/portalhost/"+location.hostname,function(status){
+if(status=="Blocked"){
+document.getElementById("error").innerHTML="Website is blocked";
+document.getElementById("adminDetails").innerHTML+=" Hostname: "+location.hostname;
+document.getElementById("games").style.display="none";
+document.getElementById("nogames").style.display="none";
+document.getElementById("gamehint").style.display="none";
+return;
+}
+if(status=="Unblocked")return;
+console.log("Unknown block status: "+status);
+});
+}
+function login(form){
+$.get("/portallogin/"+btoa(form.u.value)+"/"+btoa(form.p.value),
+function(results){
+document.getElementById("error").innerHTML=results;
+if(results.indexOf("Welcome")>0)setTimeout(function(){
+browseTheWeb();
+},10000);
+});
+}
+function browseTheWeb(){
+location.href=successurl;
+}
+</script>
+</head>
+<body onload="StartUp()">
+<center><img src="/logo.gif" height="255px" width="255px"><p>
+<span id="error">
+Please login with your username and password, both username and password are case-sensitive
+</span></p></center><form action="javascript:;">
+Username:<input type="text" name="u"><br>
+Password:<input type="password" name="p"><br>
+<input type="button" onclick="login(this.form)" value="Logon to the internet"><br>
+</form>
+<p id="gamehint">However here's a list of games you can play:
+<div id="nogames">No games installed yet</div>
+<ul id="games"></ul></p>
+<p id="adminDetails">
+If this was a mistake you can provide the network administrator with the followinig info:<br>
+<script src="/ipinfo.js"></script></p>
+</body>
+</html>
