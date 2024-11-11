@@ -2,6 +2,11 @@
 source /etc/captiveportal/config
 if [[ "$4" == *"w"* ]]
 then
+if [[ "$features" == *"agreement"* ]]
+then
+echo "<!doctype html><html><head><title>Welcome to the $welcomename network</title><script>function browseTheWeb(){"
+echo "location.href=\"$redirect\";}setTimeout(function(){browseTheWeb();},10000);</script></head><body>"
+fi
 echo "<pre>"
 fi
 # Function to check if a rule exists
@@ -32,7 +37,7 @@ fi
 if [[ -n "$1" && -n "$2" ]]; then
     # Check if the MAC address rule already exists in iptables
     if rule_exists "$1"; then
-        echo "MAC address $1 is already whitelisted.</pre>"
+        echo "MAC address $1 is already whitelisted.</pre><p>Welcome to the $welcomename network</p><input type=\"button\" value=\"Browse the web\" onclick=\"browseTheWeb()\">"
     else
 	if [[ "$features" == *"iptables"* ]]
 	then
