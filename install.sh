@@ -43,6 +43,8 @@ fi
 fi
 echo "lan_interface=$lan_interface" >> /etc/captiveportal/config
 echo "wan_interface=$wan_interface" >> /etc/captiveportal/config
+read -p "Enter homepage url, example(http://google.com): " redirect
+echo "redirect=\"$redirect\"" >> /etc/captiveportal/config
 # Split the IP address into an array using dot as the delimiter
 IFS='.' read -r -a ip_array <<< "$portalip"
 if [[ "${ip_array[0]}" == "10" ]]
@@ -63,7 +65,7 @@ fi
 if [[ "$IPConfigured" == "0" ]]
 then
 echo "Could not detect your local IP class."
-echo "Please make sure you enter the local ip address for your portal IP not your internet ip.."
+echo "Please make sure you enter the local ip address for your portal IP is not your internet ip."
 exit 1
 fi
 apt install -y ncat dnsmasq
