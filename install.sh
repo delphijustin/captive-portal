@@ -1,24 +1,23 @@
 #!/bin/bash
 IPConfigured=0
 cp -rv usr/ /
-if [[ -f "/etc/captiveportal/config" ]]
-then
-cp /etc/captiveportal/config /etc/captiveportal/config.old
-source /etc/captiveportal/config.old
-fi
 apt install -y bind9
 cp -rv etc/ /
 cp bind-db /etc/bind/db.catchall
-if [[ "$portalip" == "" ]]
-then
 echo "Please enter an ip address that will serve Captive portal DNS and web requests"
 hostname -I
 read -p "Captive Portal local network IP: " portalip
+ips=$(hostname -I)
+echo " $ips " | grep -q " $portalip "
+if [[ $? -gt 0 ]]
+then
+echo "Invalid ip or not assigned to this server"
+exit 1
 fi
 echo "portalip=$portalip" > /etc/captiveportal/config
-echo "leasetime=30d" > /etc/captiveportal/config
+echo "leasetime=30d" >> /etc/captiveportal/config
 echo "* IN A $portalip" >> /etc/bind/db.catchall
-echo "features=\"renat iptables dnsmasq-dhcp\"" >> /etc/captiveportal/config 
+echo "features=\"renat iptables dnsmasq-dhcp\"" >> /etc/captiveportal/config
 ls /sys/class/net
 read -p "Choose a LAN interface(local network, can be used as wan interface aswell): " lan_interface
 if [[ ! -d /sys/class/net/$lan_interface/ ]]
@@ -42,8 +41,7 @@ then
 exit 1
 fi
 fi
-echo "lan_interface=$lan_
-interface" >> /etc/captiveportal/config
+echo "lan_interface=$lan_interface" >> /etc/captiveportal/config
 echo "wan_interface=$wan_interface" >> /etc/captiveportal/config
 # Split the IP address into an array using dot as the delimiter
 IFS='.' read -r -a ip_array <<< "$portalip"
@@ -87,10 +85,13 @@ esac
 cat /etc/captiveportal/named.conf.header /etc/captiveportal/named.conf.footer1 /etc/captiveportal/named.conf.footer2 > /etc/bind/named.conf.local
 echo "dhcp-range=$dhcpRange,7d" >> /etc/dnsmasq.conf
 chmod +x /usr/local/bin/gameserver
+chmod +x /usr/local/bin/blocksite
+chmod +x /usr/local/bin/unblocksite
 chmod +x /usr/local/bin/mac-add
 chmod +x /usr/local/bin/captive-portal.sh
 chmod +x /usr/local/bin/natinstall
 chmod +x /usr/local/bin/cpuser
+chmod +x /usr/local/bin/hosts-build
 natinstall
 gameserver
 cp captive-portal.service /etc/systemd/system/
@@ -98,6 +99,9 @@ systemctl enable captive-portal
 systemctl enable named
 systemctl enable dnsmasq
 systemctl restart named
+echo "When someone successfully logins it will say Welcome to the network_name network"
+read -p "Enter a network name, this can be anything, it doesn't need to be your wifi name: " welcomename
+echo "welcomename=\"$welcomename\"" >> /etc/captiveportal/config
 echo "The next step is to disable DHCP Server on the Internet router and enable mac address filter to only allow this server to get internet."
 echo "Once done type the word \"DONE\" in uppercase lettes anything else will disable dhcp on this server"
 read ready
