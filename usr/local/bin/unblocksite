@@ -1,0 +1,21 @@
+#!/bin/bash
+if [[ -z "$1" ]]
+then
+echo "Usage: $0 <website_name>"
+echo "Example: $0 facebook.com"
+exit 1
+fi
+if [[ -f /tmp/captiveportal.zones ]]
+then
+rm /tmp/captiveportal.zones
+touch /tmp/captiveportal.zones
+fi
+mapfile zonelist < /etc/captiveportal/named.conf.footer0
+for zline in "${zonelist[@]}"; do
+if [[ "$zline" != "/$1.conf" ]]
+then
+echo "$zline" >> /tmp/captiveportal.zones
+fi
+done
+mv /tmp/captiveportal.zones /etc/captiveportal/named.conf.footer0
+echo "Website unblocked"
