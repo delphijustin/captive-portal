@@ -1,5 +1,9 @@
 #!/bin/bash
+source /etc/captiveportal/config
 accesstime=$(date)
+touch /etc/captiveportal/named.conf.footer0
+touch /etc/captiveportal/sites.override
+touch /etc/captiveportal/clients.csv
 if [[ -n "$NCAT_REMOTE_ADDR" ]]; then
     # Try using ip neigh first, fallback to arp if it fails
     MAC_ADDRESS=$(ip neigh show "$NCAT_REMOTE_ADDR" | awk '/..:..:..:..:..:../ {print $5}')
@@ -7,44 +11,49 @@ if [[ -n "$NCAT_REMOTE_ADDR" ]]; then
         MAC_ADDRESS=$(arp -n "$NCAT_REMOTE_ADDR" | awk '/..:..:..:..:..:../ {print $3}')
     fi
 fi
-if [[ "$1" == "stop" ]]
+if [[ "$1" == "-h" || "$1" == "--help" || "$1" == "/?" ]]
 then
-killall ncat
+echo "Usage: $0 [action]"
+echo "httpd		Starts the http server daemon"
+echo "http test		Tests a http query"
 exit 0
 fi
 if [[ "$1" == "http" ]]
 then
 touch /etc/captiveportal/log.count
 source /etc/captiveportal/log.count
-if [[ "$count" == "" ]]
+if [[ "$httpcount" == "" ]]
 then
 count=0
 fi
-source /etc/captiveportal/config
+if [[ "$2" == "test" ]]
+then
+read -p "Enter query: " query
+else
 read -t 7 method query protocol
+fi
 keepreading=1
-count=$(expr $count + 1)
-echo "<br><a href=\"javascript:toggleEntry($count)\">$accesstime</a><br>" >> /etc/captiveportal/log.html_
-echo "<ul class=\"entry\" id=\"entry$count\">" >> /etc/captiveportal/log.html_
-echo "<li>IP Address: $NCAT_REMOTE_ADDR</li>" >> /etc/captiveportal/log.html_
-echo "<li>MAC Address: $MAC_ADDRESS</li>" >> /etc/captiveportal/log.html_
-echo "<li>Method: $method</li>" >> /etc/captiveportal/log.html_
-echo "<li>Query: $query</li>" >> /etc/captiveportal/log.html_
+metas=""
+httpcount=$(expr $httpcount + 1)
+echo "<br><a href=\"javascript:toggleEntry($httpcount)\">$accesstime</a><br>" >> /etc/captiveportal/httplog.html
+echo "<ul class=\"entry\" id=\"entry$httpcount\">" >> /etc/captiveportal/httplog.html
+echo "<li>IP Address: $NCAT_REMOTE_ADDR</li>" >> /etc/captiveportal/httplog.html
+echo "<li>MAC Address: $MAC_ADDRESS</li>" >> /etc/captiveportal/httplog.html
+echo "<li>Method: $method</li>" >> /etc/captiveportal/httplog.html
+echo "<li>Query: $query</li>" >> /etc/captiveportal/httplog.html
 while [[ "$keepreading" == "1" ]]
 do
 keepreading=0
-metas=
 if read -t 2 meta; then
 keepreading=1
-echo -n "<li>" >> /etc/captiveportal/log.html_
-echo -n "$meta" >> /etc/captiveportal/log.html_
-echo "</li>" >> /etc/captiveportal/log.html_
+echo -n "<li>" >> /etc/captiveportal/httplog.html
+echo -n "$meta" >> /etc/captiveportal/httplog.html
+echo "</li>" >> /etc/captiveportal/httplog.html
 metas=$metas $meta
 fi
 done
-echo "</ul>" >> /etc/captiveportal/log.html_
-cat /etc/captiveportal/logheader.html_  /etc/captiveportal/log.html_  /etc/captiveportal/logfooter.html_ > /etc/captiveportal/log.html
-echo "count=$count" > /etc/captiveportal/log.count
+echo "</ul>" >> /etc/captiveportal/httplog.html
+echo "httpcount=$httpcount" > /etc/captiveportal/log.count
 echo "# This file keeps track of the number of requests logged" >> /etc/captiveportal/log.count
 if [[ "$query" == *".."* ]]
 then
@@ -65,7 +74,7 @@ if [[ -f "/etc/captiveportal/users" ]]
 then
 mapfile -t users < /etc/captiveportal/users
 for userline in "${users[@]}"; do
-if [[ "$query" == *"$userline"* ]]
+if [[ "$query" == "/portallogin/$userline" ]]
 then
 if [[ "$userline" != "" ]]
 then
@@ -126,7 +135,8 @@ echo "Content-type: text/plain"
 echo ""
 touch /etc/captiveportal/hosts.domains
 hostquery="${query//\portalhost\//}"
-if [[ -f "/etc/captiveportal/zones/$hostquery.conf" ]]
+cat /etc/bind/named.conf.local | grep -q "zone \"$hostquery\""
+if [[ $? -eq 0 ]]
 then
 echo -n "Blocked"
 exit 0
@@ -201,6 +211,34 @@ echo ""
 cat /etc/captiveportal/agree.js
 exit 0
 fi
+if [[ "$query" == "/accesslog/"* ]]
+then
+echo "Content-type: text/html"
+echo ""
+if [[ "$query" == "/accesslog/$logsecret/"* ]]
+then
+if [[ "$query" == *"/http"* ]]
+then
+echo "<!doctype html><html><head><title>CaptivePortal Log</title><style>.entry{display:none;}</style><script>function toggleEntry(x){var entry=document.getElementById(\"entry\"+x);if(entry.style.display==\"none\"){entry.style.display=\"block\";return;}entry.style.display=\"none\";}</script><body>"
+cat /etc/captiveportal/httplog.html
+echo "</body></html>"
+exit 0
+fi
+if [[ "$query" == *"/hosts"* ]]
+then
+cat /etc/captiveportal/hosts.html
+exit 0
+fi
+if [[ "$query" == "/accesslog/$logsecret/" ]]
+then
+echo "<!doctype html><html><head><title>Choose a log</title></head><body><ul><li><a href=\"hosts$RANDOM$RANDOM$RANDOM\">last hosts updates</a></li><li><a href=\"http\">HTTP Log</a></li></ul></body></html>"
+exit 0
+fi
+else
+cat /etc/captiveportal/forbidden.html
+fi
+exit 0
+fi
 if [[ "$query" == "/games.js" ]]
 then
 echo "Content-type: text/javascript"
@@ -220,7 +258,8 @@ fi
 if [[ "$features" == *"agreement"* ]]
 then
 agreeID=$RANDOM$RANDOM$RANDOM$RANDOM$RANDOM
-echo "?a=$agreeID" > /etc/captiveportal/users
+cat /dev/null > /etc/captiveportal/users
+cpuser agree $agreeID
 echo "const agree=\"$agreeID\";" > /etc/captiveportal/agree.js
 fi
 if [[ "$features" == *"renat"* ]]
@@ -231,9 +270,4 @@ if [[ "$1" == "httpd" ]]
 then
 echo "Starting delphijustin Captive-Portal(HTTP daemon)..."
 ncat -k -l 80 --sh-exec "captive-portal.sh http"
-fi
-if [[ "$1" == "httpsd" ]]
-then
-echo "Starting delphijustin Captive-Portal(HTTPS daemon)..."
-ncat --ssl --ssl-cert /etc/captiveportal/cert.pem -k -l 8443 --sh-exec "captive-portal.sh http"
 fi
