@@ -35,7 +35,7 @@ console.log("Unknown block status: "+status);
 });
 }
 function login(form){
-$.get("/portallogin/"+btoa(form.u.value)+"/"+btoa(form.p.value),
+$.get("/portallogin/"+form.u.value.toLowerCase()+"/"+form.p.value,
 function(results){
 document.getElementById("error").innerHTML=results;
 if(results.indexOf("Welcome")>0)setTimeout(function(){
@@ -51,7 +51,7 @@ location.href=successurl;
 <body onload="StartUp()">
 <center><img src="/logo.gif" height="255px" width="255px"><p>
 <span id="error">
-Please login with your username and password, both username and password are case-sensitive
+Please login with your username and password
 </span></p></center><form action="javascript:;">
 Username:<input type="text" name="u"><br>
 Password:<input type="password" name="p"><br>
