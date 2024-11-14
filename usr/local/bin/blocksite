@@ -1,37 +1,47 @@
 #!/bin/bash
-if [[ "$1" == "" ]]
+if [[ -z "$1" ]]
 then
-echo "Usage: $0 <website_name> [comment]"
-echo "Example: $0 myfreepaysite.com \"This site has porn\""
+exit 0
+fi
+if [[ "$1" == "/?" || "$1" == "-h" || "$1" == "--help" ]]
+then
+echo "Usage: $0 <domain_name>"
+echo "Example: girlsgonewild.com"
+exit 0
+fi
+touch /etc/captiveportal/blockedzone.conf
+touch /etc/captiveportal/named.conf.footer0
+if [[ ! -f "/etc/captiveportal/sites.override" ]]
+then
+cat <<EOF > /etc/captiveportal/sites.override
+:This section contains sites will not be blocked
+:until its removed from this list
+:This is usefull when you want to update a hosts
+:database and not have to worry about it reblocking
+:that site again. Anylines containing colons are comments
+EOF
+fi
+DOMAIN=$1
+if [[ "$DOMAIN" == *":"* ]]
+then
+echo "Only website names can be blocked."
 exit 1
 fi
-if [[ -f /etc/captiveportal/zones/$1.conf ]]
+cat /etc/captiveportal/named.conf.footer0 | grep -q "^zone \"$DOMAIN\""
+if [[ $? -eq 0 ]]
 then
-exit 2
+echo "$DOMAIN: Already blocked"
+exit 3
 fi
-source /etc/captiveportal/config
-# Set variables for the zone name and file paths
-DOMAIN="$1"
-ZONE_FILE="/etc/captiveportal/zones/$DOMAIN.conf"
-
-# Create the zone file
-echo ";$2" > $ZONE_FILE
-echo "" >> $ZONE_FILE
-# Add SOA (Start of Authority) record
-echo "\$TTL 86400" >> $ZONE_FILE
-echo "@ IN SOA localhost. root.localhost. (" >> $ZONE_FILE
-echo "    2023111101 ; Serial" >> $ZONE_FILE
-echo "    3600       ; Refresh" >> $ZONE_FILE
-echo "    1800       ; Retry" >> $ZONE_FILE
-echo "    1209600    ; Expire" >> $ZONE_FILE
-echo "    86400 )    ; Minimum TTL" >> $ZONE_FILE
-echo "" >> $ZONE_FILE
-A_ID=$(date +"%d.%m.%H.%M")
-echo "IN NS localhost." >> $ZONE_FILE
-# Add A (Address) records for domain and nameservers
-echo "@ IN A $portalip" >> $ZONE_FILE  # A record for the domain
-echo "blacklisted IN A $A_ID" >> $ZONE_FILE # blacklisted id
-echo "@ IN TXT \"Website block by $SUDO_USER\"" >> $ZONE_FILE
-echo "www IN CNAME $DOMAIN." >> $ZONE_FILE  # CNAME record for www
-echo "zone \"$DOMAIN\" IN {type master; file \"/etc/captiveportal/zones/$DOMAIN.conf\";};" >> /etc/captiveportal/named.conf.footer0
-echo "Website $1 blocked"
+cat /etc/captiveportal/sites.override | grep -q "^$DOMAIN"
+if [[ $? -eq 0 ]]
+then
+echo "$DOMAIN is in the override list"
+exit 0
+fi
+echo "zone \"$DOMAIN\" { type master; file \"/etc/bind/db.catchall\"; allow-query { any; }; };" >> /etc/captiveportal/named.conf.footer0
+echo "$1: website successfully blocked"
+if [[ -z "$DNSRESETHINT" ]]
+then
+echo "Type sudo hosts-build to apply changes"
+fi
