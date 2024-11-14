@@ -90,6 +90,7 @@ chmod +x /usr/local/bin/gameserver
 chmod +x /usr/local/bin/blocksite
 chmod +x /usr/local/bin/unblocksite
 chmod +x /usr/local/bin/mac-add
+chmod +x /usr/local/bin/hosts-get
 chmod +x /usr/local/bin/captive-portal.sh
 chmod +x /usr/local/bin/natinstall
 chmod +x /usr/local/bin/cpuser
