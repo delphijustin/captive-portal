@@ -6,7 +6,7 @@
  /etc/captiveportal/config
 
 after that execute the following command in the server shell:
-sudo captive-portal.sh
+sudo captive-portal refresh
 -->
 <head>
 <!-- DO NOT REMOVE THIS COMMENT: AGREEMENT -->
@@ -25,6 +25,9 @@ document.getElementById("doc").innerHTML="This website is blocked.<br>Hostname:"
 }
 });
 }
+function agree(){
+location.pathname="/portallogin/agree/"+agreeID
+}
 </script>
 </head>
 <body onload="startup()">
@@ -32,14 +35,11 @@ document.getElementById("doc").innerHTML="This website is blocked.<br>Hostname:"
 <span id="doc">
 Before getting online you must agree to the following terms of service:</p>
 </center>
-<form method="get" action="/portallogin/">
-<input type="hidden" name="a" id="a">
 <p>
 <!-- BEGIN TERMS OF SERVICE HTML -->
 
 <!-- END TERMS OF SERVICE HTML -->
-</p><input type="submit" value="Agree">
-</form>
+</p><input type="button" value="Agree" onclick="agree()">
 </span>
 </body>
 </html>
