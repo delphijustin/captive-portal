@@ -7,7 +7,7 @@ keywords="porn malware"
 if len(sys.argv)==1:
 	print("Downloads a hosts blacklist.")
 	print("Usage: ",sys.argv[0]," <categories_and_urls>")
-	print("Category Keywords: porn and malware")
+	print("Category Keywords:",keywords)
 	sys.exit()
 os.environ['DNSRESETHINT']=sys.argv[0]
 blocksfound=0
