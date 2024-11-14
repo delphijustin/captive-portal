@@ -25,7 +25,8 @@ document.getElementById("doc").innerHTML="This website is blocked.<br>Hostname:"
 }
 });
 }
-function agree(){
+function agree(o){
+if(o.value!="I agree")return;
 location.pathname="/portallogin/agree/"+agreeID
 }
 </script>
@@ -39,7 +40,7 @@ Before getting online you must agree to the following terms of service:</p>
 <!-- BEGIN TERMS OF SERVICE HTML -->
 
 <!-- END TERMS OF SERVICE HTML -->
-</p><input type="button" value="Agree" onclick="agree()">
+</p><input type="button" value="Agree" onclick="agree(this)">
 </span>
 </body>
 </html>
