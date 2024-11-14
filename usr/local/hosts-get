@@ -1,0 +1,47 @@
+#!/usr/bin/python3
+import requests
+import os
+import sys
+import subprocess
+keywords="porn malware"
+if len(sys.argv)==1:
+	print("Downloads a hosts blacklist.")
+	print("Usage: ",sys.argv[0]," <categories_and_urls>")
+	print("Category Keywords: porn and malware")
+	sys.exit()
+os.environ['DNSRESETHINT']=sys.argv[0]
+blocksfound=0
+unblocksfound=0
+hostlist=[]
+currentline=1
+processed=False
+for category in sys.argv[1:]:
+	print("Processing ",category,"...")
+	if("http://" in category)or("https://" in category):
+		hostlist.extend(requests.get(category).text.strip().split('\n'))
+		processed=True
+	elif category in keywords:
+		processed=("porn" in category)or("malware" in category)
+		if processed:
+			if category=="porn":
+				url="https://raw.githubusercontent.com/davosmeza/AntiPorn-2024/refs/heads/main/hosts"
+			if category=="malware":
+				url="https://someonewhocares.org/hosts/zero/hosts"
+			hostlist.extend(requests.get(url).text.strip().split('\n'))
+	if not processed:
+		print(category,":Bad keyword/url")
+		sys.exit()
+for hline in hostlist:
+	host=hline.strip().split(' ')
+	if len(host)>1:
+		if(host[0]=="127.0.0.1")or(host[0]=="0.0.0.0")or(host[0]=="::1")or(host[0]=="::"):
+			blockname=host[1]
+			blocksfound=blocksfound+1
+			print(currentline,":",subprocess.run(f"blocksite {blockname}",capture_output=True, text=True, shell=True).stdout.strip())
+		if(host[0]=="#127.0.0.1")or(host[0]=="#0.0.0.0")or(host[0]=="#::1")or(host[0]=="#::"):
+			blockname=host[1]
+			unblocksfound=unblocksfound+1
+			print(currentline,":",subprocess.run(f"unblocksite {blockname}",capture_output=True, text=True, shell=True).stdout.strip())
+	currentline=currentline+1
+print("Blocked ",blocksfound," found, Unblocked ",unblocksfound," found")
+print("Type sudo hosts-build to apply changes")
