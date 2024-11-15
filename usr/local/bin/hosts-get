@@ -43,11 +43,11 @@ for hline in hostlist:
 		if(host[0]=="127.0.0.1")or(host[0]=="0.0.0.0")or(host[0]=="::1")or(host[0]=="::"):
 			blockname=host[1]
 			blocksfound=blocksfound+1
-			print(currentline,":",subprocess.run(f"blocksite {blockname}",capture_output=True, text=True, shell=True).stdout.strip())
+			print(round(100*(currentline/len(hostlist))),"%",subprocess.run(f"blocksite {blockname}",capture_output=True, text=True, shell=True).stdout.strip())
 		if(host[0]=="#127.0.0.1")or(host[0]=="#0.0.0.0")or(host[0]=="#::1")or(host[0]=="#::"):
 			blockname=host[1]
 			unblocksfound=unblocksfound+1
-			print(currentline,":",subprocess.run(f"unblocksite {blockname}",capture_output=True, text=True, shell=True).stdout.strip())
+			print(round(100*(currentline/len(hostlist))),"%",,subprocess.run(f"unblocksite {blockname}",capture_output=True, text=True, shell=True).stdout.strip())
 	currentline=currentline+1
 print(f"Blocked {blocksfound} sites, Unblocked ",unblocksfound," sites")
 print("Type sudo hosts-build to apply changes")
