@@ -1,3 +1,0 @@
-#!/bin/bash
-cat /etc/captiveportal/named.conf.header /etc/captiveportal/unblocked-list /etc/captiveportal/named.conf.footer1 /etc/captiveportal/named.conf.footer0 /etc/captiveportal/named.conf.footer2 > /etc/bind/named.conf.local
-systemctl restart named
