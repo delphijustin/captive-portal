@@ -87,14 +87,10 @@ esac
 cat /etc/captiveportal/named.conf.header /etc/captiveportal/named.conf.footer1 /etc/captiveportal/named.conf.footer2 > /etc/bind/named.conf.local
 echo "dhcp-range=$dhcpRange,7d" >> /etc/dnsmasq.conf
 chmod +x /usr/local/bin/gameserver
-chmod +x /usr/local/bin/blocksite
-chmod +x /usr/local/bin/unblocksite
 chmod +x /usr/local/bin/mac-add
-chmod +x /usr/local/bin/hosts-get
 chmod +x /usr/local/bin/captive-portal.sh
 chmod +x /usr/local/bin/natinstall
 chmod +x /usr/local/bin/cpuser
-chmod +x /usr/local/bin/hosts-build
 natinstall
 gameserver
 cp captive-portal.service /etc/systemd/system/
