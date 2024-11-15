@@ -3,7 +3,7 @@ import requests
 import os
 import sys
 import subprocess
-keywords="porn malware"
+keywords="porn malware fakenews social gambling"
 if len(sys.argv)==1:
 	print("Downloads a hosts blacklist.")
 	print("Usage: ",sys.argv[0]," <categories_and_urls>")
@@ -16,20 +16,26 @@ hostlist=[]
 currentline=1
 processed=False
 for category in sys.argv[1:]:
-	print("Processing ",category,"...")
+	print(f"Processing {category}...")
 	if("http://" in category)or("https://" in category):
 		hostlist.extend(requests.get(category).text.strip().split('\n'))
 		processed=True
 	elif category in keywords:
-		processed=("porn" in category)or("malware" in category)
+		processed=("porn" in category)or("malware" in category)or("fakenews" in category)or("social" in category)or("gambling")
 		if processed:
 			if category=="porn":
 				url="https://raw.githubusercontent.com/davosmeza/AntiPorn-2024/refs/heads/main/hosts"
 			if category=="malware":
 				url="https://someonewhocares.org/hosts/zero/hosts"
+			if category=="fakenews":
+				url="https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-only/hosts"
+			if category=="social":
+				url="https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/social-only/hosts"
+			if category=="gambling":
+				url="https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/gambling-only/hosts"
 			hostlist.extend(requests.get(url).text.strip().split('\n'))
 	if not processed:
-		print(category,":Bad keyword/url")
+		print(f"{category}:Bad keyword/url")
 		sys.exit()
 for hline in hostlist:
 	host=hline.strip().split(' ')
@@ -43,5 +49,5 @@ for hline in hostlist:
 			unblocksfound=unblocksfound+1
 			print(currentline,":",subprocess.run(f"unblocksite {blockname}",capture_output=True, text=True, shell=True).stdout.strip())
 	currentline=currentline+1
-print("Blocked ",blocksfound," found, Unblocked ",unblocksfound," found")
+print(f"Blocked {blocksfound} sites, Unblocked ",unblocksfound," sites")
 print("Type sudo hosts-build to apply changes")
