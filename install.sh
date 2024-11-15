@@ -68,7 +68,7 @@ echo "Could not detect your local IP class."
 echo "Please make sure you enter the local ip address for your portal IP is not your internet ip."
 exit 1
 fi
-apt install -y ncat dnsmasq
+apt install -y ncat dnsmasq att python3-requests
 cp /etc/dnsmasq.conf /etc/captiveportal/dnsmasq.conf.off
 echo "port=0" > /etc/dnsmasq.conf
 echo "dhcp-option=3,$portalip" >> /etc/dnsmasq.conf
