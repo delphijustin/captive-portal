@@ -1,6 +1,6 @@
 const params = new URLSearchParams(window.location.search);
-function retryInternet(){
 var trys=Number(params.get("portalsuccess"))+1;
+function retryInternet(){
 location.href="/portalsuccess/?portalsuccess="+trys;
 }
 function blockedPageStart(){
