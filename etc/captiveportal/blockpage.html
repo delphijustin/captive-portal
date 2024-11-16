@@ -11,31 +11,9 @@ display:none;
 }
 </style>
 <script src="/games.js"></script>
-<script src="/jquery.js"></script>
-<script>
-function StartUp(){
-if(games.length==0){
-document.getElementById("nogames").style.display="block";
-}
-games.forEach(function(game){
-document.getElementById("games").innerHTML+='<li><a href="//'+portalip+'/games/'+game.filename+'">'+game.caption+'</a></li>';
-});
-$.get("/portalhost/"+location.hostname,function(status){
-if(status=="Blocked"){
-document.getElementById("error").innerHTML="Website is blocked";
-document.getElementById("adminDetails").innerHTML+=" Hostname: "+location.hostname;
-document.getElementById("games").style.display="none";
-document.getElementById("nogames").style.display="none";
-document.getElementById("gamehint").style.display="none";
-return;
-}
-if(status=="Unblocked")return;
-console.log("Unknown block status: "+status);
-});
-}
-</script>
+<script src="/captiveportal.js"></script>
 </head>
-<body onload="StartUp()">
+<body onload="blockedPageStart()">
 <center><img src="/logo.gif" height="255px" width="255px"><p>
 <span id="error">
 You don't have full internet access yet.
