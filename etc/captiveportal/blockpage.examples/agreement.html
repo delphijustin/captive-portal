@@ -4,10 +4,7 @@
  NETADMIN NOTE: TO ENABLE THIS PAGE PLEASE ADD THE
  THE WORD "agreement" TO THE FEATURES VARIABLE IN
  /etc/captiveportal/config
-
-after that execute the following command in the server shell:
-sudo captive-portal.sh refresh
--->
+ -->
 <head>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -17,14 +14,17 @@ sudo captive-portal.sh refresh
 <script src="/agree.js"></script>
 <script src="/captiveportal.js"></script>
 </head>
-<body>
+<body onload="initAgreement()">
 <p><center><img src="/logo.gif" height="255px" width="255px"><br>
 Before getting online you must agree to the following terms of service:</p>
 </center>
+<form method="get" action="/portalconfirm/">
 <p>
 <!-- BEGIN TERMS OF SERVICE HTML -->
 
 <!-- END TERMS OF SERVICE HTML -->
-</p><input type="button" onclick="agree(this)" value="I Agree">
+</p><input type="submit" value="I Agree">
+ <input type="hidden" name="a" id="a">
+</form>
 </body>
 </html>
