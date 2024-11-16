@@ -63,13 +63,35 @@ cat /etc/captiveportal/forbidden.html
 exit 0
 fi
 echo "HTTP/1.0 200 OK"
-if [[ "$query" == "/portalsuccess/"* || "$query" == *"?portalsuccess=" ]]
+if [[ "$query" == "/success.php?redirect="* ]]
+then
+echo "Content-type: text/javascript"
+echo ""
+echo "console.log('captiveportal Internet is still applying settings');"
+exit 0
+fi
+if [[ "$query" == "/portalsuccess/"* || "$query" == *"?portaltrys="* ]]
 then
 echo "Content-type: text/html"
-contentlength=$(stat -c%s /etc/captiveportal/success.html)
-echo "Content-length: $contentlength"
 echo ""
-cat /etc/captiveportal/success.html
+cat <<EOF
+<!doctype html>
+<html>
+<head>
+<script src="//$RANDOM$RANDOM$RANDOM$RANDOM.portal.dongwa.xyz/success.php?redirect=$redirect" async></script>
+<script src="/captiveportal.js"></script>
+<title>Getting you online...</title>
+<script>
+setInterval(function(){retryInternet();},24000);
+</script>
+</head>
+<body>
+<center><p><img src="/logo.gif" height="255px" width="255px"><br>
+Getting you online...
+</p></center>
+</body>
+</html>
+EOF
 exit 0
 fi
 if [[ "$query" == "/captiveportal.js" ]]
