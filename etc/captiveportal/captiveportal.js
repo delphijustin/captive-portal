@@ -1,7 +1,9 @@
 const params = new URLSearchParams(window.location.search);
-var trys=Number(params.get("portalsuccess"))+1;
+var trys=0;
+if(params.has("portaltrys"))
+trys=Number(params.get("portaltrys"))+1;
 function retryInternet(){
-location.href="/portalsuccess/?portalsuccess="+trys;
+location.href="/portalsuccess/?portaltrys="+trys;
 }
 function blockedPageStart(){
 if(games.length==0){
@@ -17,9 +19,12 @@ $.get("/portallogin/"+form.u.value.toLowerCase()+"/"+form.p.value,
 function(results){
 document.getElementById("error").innerHTML=results;
 if(results.indexOf("Welcome")>0)setTimeout(function(){
-location.href="/portalsuccess/?portalsuccess=1";
+location.href="/portalsuccess/?portaltrys=1";
 },10000);
 });
+}
+function browseTheWeb(){
+location.href=successurl;
 }
 function agree(o){
 if(o.value!="I Agree")return;
