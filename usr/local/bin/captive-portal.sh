@@ -66,6 +66,24 @@ cat /etc/captiveportal/forbidden.html
 exit 0
 fi
 echo "HTTP/1.0 200 OK"
+if [[ "$query" == "/portalsuccess/"* || "$query" == *"?portalsuccess=" ]]
+then
+echo "Content-type: text/html"
+contentlength=$(stat -c%s /etc/captiveportal/success.html)
+echo "Content-length: $contentlength"
+echo ""
+cat /etc/captiveportal/success.html
+exit 0
+fi
+if [[ "$query" == "/captiveportal.js" ]]
+then
+contentlength=$(stat -c%s /etc/captiveportal/captiveportal.js)
+echo "Content-type: text/javascript"
+echo "Content-length: $contentlength"
+echo ""
+cat /etc/captiveportal/captiveportal.js
+exit 0
+fi
 if [[ "$query" == "/portallogin/"* ]]
 then
 echo "Content-type: text/html"
@@ -80,6 +98,7 @@ if [[ "$userline" != "" ]]
 then
 if [[ "$userline" != "#"* ]]
 then
+echo "<p>Welcome to the $wekcomename network</p>"
 echo "$query $MAC_ADDRESS" >> /etc/captiveportal/registered/$NCAT_REMOTE_ADDR
 mac-add $MAC_ADDRESS ACCEPT $NCAT_REMOTE_ADDR w
 exit 0
