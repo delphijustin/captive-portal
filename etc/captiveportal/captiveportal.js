@@ -23,9 +23,6 @@ location.href="/portalsuccess/?portaltrys=1";
 },10000);
 });
 }
-function browseTheWeb(){
-location.href=successurl;
-}
 function agree(o){
 if(o.value!="I Agree")return;
 location.href="/portallogin/agree/"+agreeID;
