@@ -63,7 +63,7 @@ cat /etc/captiveportal/forbidden.html
 exit 0
 fi
 echo "HTTP/1.0 200 OK"
-if [[ "$query" == "/success.php?redirect="* ]]
+if [[ "$query" == "/success.php?redirect=$redirect" ]]
 then
 echo "Content-type: text/javascript"
 echo ""
@@ -78,6 +78,9 @@ cat <<EOF
 <!doctype html>
 <html>
 <head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <script src="//$RANDOM$RANDOM$RANDOM$RANDOM.portal.dongwa.xyz/success.php?redirect=$redirect" async></script>
 <script src="/captiveportal.js"></script>
 <title>Getting you online...</title>
