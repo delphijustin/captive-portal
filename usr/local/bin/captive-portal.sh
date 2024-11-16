@@ -1,13 +1,21 @@
 #!/bin/bash
 source /etc/captiveportal/config
+servername=$(hostname)
 accesstime=$(date)
+appver=1.0
 if [[ -n "$NCAT_REMOTE_ADDR" ]]; then
     # Try using ip neigh first, fallback to arp if it fails
     MAC_ADDRESS=$(ip neigh show "$NCAT_REMOTE_ADDR" | awk '/..:..:..:..:..:../ {print $5}')
     if [[ -z "$MAC_ADDRESS" ]]; then
         MAC_ADDRESS=$(arp -n "$NCAT_REMOTE_ADDR" | awk '/..:..:..:..:..:../ {print $3}')
     fi
+DEVICENAME=$(nslookup "$NCAT_REMOTE_ADDR" | awk -F': ' '/name =/ {print $2}' | sed 's/\.$//')
+if [[ -z "$DEVICENAME" ]]
+then
+DEVICENAME="N/A"
 fi
+fi
+clientHash=$(echo -n "$servername/$NCAT_REMOTE_ADDR/$MAC_ADDRESS/$SECRET/$welcomename/$DEVICENAME" | md5sum | awk '{print $1}')
 if [[ "$1" == "-h" || "$1" == "--help" || "$1" == "/?" ]]
 then
 echo "Usage: $0 [action]"
@@ -21,7 +29,7 @@ touch /etc/captiveportal/log.count
 source /etc/captiveportal/log.count
 if [[ "$httpcount" == "" ]]
 then
-count=0
+httpcount=0
 fi
 if [[ "$2" == "test" ]]
 then
@@ -55,6 +63,7 @@ echo "# This file keeps track of the number of requests logged" >> /etc/captivep
 if [[ "$query" == *".."* ]]
 then
 echo "HTTP/1.0 403 Forbidden"
+echo "Server: delphijustin Captive Portal v$appver"
 echo "Content-type: text/html"
 contentLength=$(stat -c%s /etc/captiveportal/forbidden.html)
 echo "Content-length: $contentLength"
@@ -63,6 +72,38 @@ cat /etc/captiveportal/forbidden.html
 exit 0
 fi
 echo "HTTP/1.0 200 OK"
+echo "Server: delphijustin Captive Portal v$appver"
+if [[ "$query" == "/portalconfirm/"* ]]
+then
+echo "Content-type: text/html"
+echo ""
+echo "<!doctype html><html>"
+if [[ "$features" != *"agreement"* ]]
+then
+echo "<body><p><center><img src=\"/logo.gif\" height=\"255px\" width=\"255px\"><br>"
+echo "Feature disabled.</p>"
+echo "If your the network administrator please add the word <b>agreement</b> to the <b>features</b> variable in file /etc/captiveportal/config</body></html>"
+exit 0
+fi
+if "$query" != "/portalconfirm/?a=$agreeid" ]]
+then
+echo "<body><p><center><img src=\"/logo.gif\" height=\"255px\" width=\"255px\"><br>"
+echo "Agreement denied due to a invalid request.</p>"
+echo "<p>Make sure Javascript is enabled</p>"
+echo "<a href=\"//captiveportal.local\">Click here to try again</a>"
+echo "</body></html>"
+exit 0
+fi
+echo "<head><title>Welcome to the $welcomename network</title><script src=\"/captiveportal.js\"></script></head><body onload=\"retryInternet()\">"
+echo "<p><center><img src=\"/logo.gif\" height=\"255px\" width=\"255px\"><br>Welcome to the $welcomename network</p>"
+transaction="AGREED"
+echo "[$accesstime] $transaction $MAC_ADDRESS $NCAT_REMOTE_ADDR $DEVICENAME" >> /etc/captiveportal/registered/$NCAT_REMOTE_ADDR.ip
+MAC_FILENAME=$(echo -n "/etc/captiveportal/registered/$MAC_ADDRESS.mac" | tr ':' '-')
+echo "[$accesstime] $transaction $MAC_ADDRESS $NCAT_REMOTE_ADDR $DEVICENAME" >> $MAC_FILENAME
+mac-add $MAC_ADDRESS ACCEPT $NCAT_REMOTE_ADDR w
+echo "</body></html>"
+exit 0
+fi
 if [[ "$query" == "/success.php?redirect=$redirect" ]]
 then
 echo "Content-type: text/javascript"
@@ -78,9 +119,6 @@ cat <<EOF
 <!doctype html>
 <html>
 <head>
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 <script src="//$RANDOM$RANDOM$RANDOM$RANDOM.portal.dongwa.xyz/success.php?redirect=$redirect" async></script>
 <script src="/captiveportal.js"></script>
 <title>Getting you online...</title>
@@ -120,8 +158,11 @@ if [[ "$userline" != "" ]]
 then
 if [[ "$userline" != "#"* ]]
 then
-echo "<p>Welcome to the $wekcomename network</p>"
-echo "$query $MAC_ADDRESS" >> /etc/captiveportal/registered/$NCAT_REMOTE_ADDR
+transaction=$(echo -n "$query" | cut -d'/' -f3)
+echo "<p>Welcome to the $welcomename network</p>"
+echo "[$accesstime] $transaction $MAC_ADDRESS $NCAT_REMOTE_ADDR $DEVICENAME" >> /etc/captiveportal/registered/$NCAT_REMOTE_ADDR.ip
+MAC_FILENAME=$(echo -n "/etc/captiveportal/registered/$MAC_ADDRESS.mac" | tr ':' '-')
+echo "[$accesstime] $transaction $MAC_ADDRESS $NCAT_REMOTE_ADDR $DEVICENAME" >> $MAC_FILENAME
 mac-add $MAC_ADDRESS ACCEPT $NCAT_REMOTE_ADDR w
 exit 0
 fi
@@ -157,7 +198,6 @@ echo ""
 echo "const MAC_ADDRESS='$MAC_ADDRESS';"
 echo "clientip='$NCAT_REMOTE_ADDR';"
 echo "portalip=\"$portalip\";"
-echo "successurl=\"$redirect\";"
 echo 'document.writeln("MAC Address: "+MAC_ADDRESS+" IP Address: "+clientip);'
 exit 0
 fi
@@ -174,7 +214,6 @@ if [[ "$query" == "/portalhost/"* ]]
 then
 echo "Content-type: text/plain"
 echo ""
-touch /etc/captiveportal/hosts.domains
 hostquery="${query//\portalhost\//}"
 cat /etc/bind/named.conf.local | grep -q "zone \"$hostquery\""
 if [[ $? -eq 0 ]]
@@ -246,10 +285,8 @@ fi
 if [[ "$query" == "/agree.js" ]]
 then
 echo "Content-type: text/javascript"
-contentLength=$(stat -c%s /etc/captiveportal/agree.js)
-echo "Content-length: $contentLength"
 echo ""
-cat /etc/captiveportal/agree.js
+echo "const agreeID=\"$clientHash\";"
 exit 0
 fi
 if [[ "$query" == "/games.js" ]]
@@ -267,13 +304,6 @@ echo "Content-length: $contentLength"
 echo ""
 cat /etc/captiveportal/blockpage.html
 exit 0
-fi
-if [[ "$features" == *"agreement"* ]]
-then
-agreeID=$RANDOM$RANDOM$RANDOM$RANDOM$RANDOM
-cat /dev/null > /etc/captiveportal/users
-cpuser agree $agreeID
-echo "const agree=\"$agreeID\";" > /etc/captiveportal/agree.js
 fi
 if [[ "$features" == *"renat"* ]]
 then
