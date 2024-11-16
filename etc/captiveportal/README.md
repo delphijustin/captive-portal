@@ -10,4 +10,5 @@ Configuration files go here:
   <li>named.conf* - named.conf.local file parts</li>
   <li>forbidden.html - forbidden webpage</li>
   <li>games/ - games directory anything here will be avalible for access through the /games/ root on the server</li>
+  <li>success.html - The prepairing internet page</li>
 </hl>
