@@ -1,9 +1,6 @@
 #!/bin/bash
 source /etc/captiveportal/config
 accesstime=$(date)
-touch /etc/captiveportal/named.conf.footer0
-touch /etc/captiveportal/sites.override
-touch /etc/captiveportal/clients.csv
 if [[ -n "$NCAT_REMOTE_ADDR" ]]; then
     # Try using ip neigh first, fallback to arp if it fails
     MAC_ADDRESS=$(ip neigh show "$NCAT_REMOTE_ADDR" | awk '/..:..:..:..:..:../ {print $5}')
@@ -228,34 +225,6 @@ contentLength=$(stat -c%s /etc/captiveportal/agree.js)
 echo "Content-length: $contentLength"
 echo ""
 cat /etc/captiveportal/agree.js
-exit 0
-fi
-if [[ "$query" == "/accesslog/"* ]]
-then
-echo "Content-type: text/html"
-echo ""
-if [[ "$query" == "/accesslog/$logsecret/"* ]]
-then
-if [[ "$query" == *"/http"* ]]
-then
-echo "<!doctype html><html><head><title>CaptivePortal Log</title><style>.entry{display:none;}</style><script>function toggleEntry(x){var entry=document.getElementById(\"entry\"+x);if(entry.style.display==\"none\"){entry.style.display=\"block\";return;}entry.style.display=\"none\";}</script><body>"
-cat /etc/captiveportal/httplog.html
-echo "</body></html>"
-exit 0
-fi
-if [[ "$query" == *"/hosts"* ]]
-then
-cat /etc/captiveportal/hosts.html
-exit 0
-fi
-if [[ "$query" == "/accesslog/$logsecret/" ]]
-then
-echo "<!doctype html><html><head><title>Choose a log</title></head><body><ul><li><a href=\"hosts$RANDOM$RANDOM$RANDOM\">last hosts updates</a></li><li><a href=\"http\">HTTP Log</a></li></ul></body></html>"
-exit 0
-fi
-else
-cat /etc/captiveportal/forbidden.html
-fi
 exit 0
 fi
 if [[ "$query" == "/games.js" ]]
