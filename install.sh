@@ -61,7 +61,7 @@ echo "Could not detect your local IP class."
 echo "Please make sure you enter the local ip address for your portal IP is not your internet ip."
 exit 1
 fi
-apt install -y ncat dnsmasq att python3-requests
+apt install -y ncat dnsmasq
 cp /etc/dnsmasq.conf /etc/captiveportal/dnsmasq.conf.off
 echo "port=0" > /etc/dnsmasq.conf
 echo "dhcp-option=3,$portalip" >> /etc/dnsmasq.conf
@@ -77,13 +77,6 @@ case $IPConfigured in
  dhcpRange=${ip_array[0]}.${ip_array[1]}.${ip_array[2]}.1,${ip_array[0]}.${ip_array[1]}.${ip_array[2]}.254
  ;;
 esac
-cat /etc/captiveportal/named.conf.header /etc/captiveportal/named.conf.footer1 /etc/captiveportal/named.conf.footer2 > /etc/bind/named.conf.local
-echo "dhcp-range=$dhcpRange,7d" >> /etc/dnsmasq.conf
-echo "portalip=$portalip" > /etc/captiveportal/config
-echo "leasetime=30d" >> /etc/captiveportal/config
-echo "features=\"renat iptables dnsmasq-dhcp\"" >> /etc/captiveportal/config
-cp bind-db /etc/bind/db.catchall
-echo "* IN A $portalip" >> /etc/bind/db.catchall
 chmod +x /usr/local/bin/gameserver
 chmod +x /usr/local/bin/mac-add
 chmod +x /usr/local/bin/captive-portal.sh
@@ -98,7 +91,19 @@ systemctl enable dnsmasq
 systemctl restart named
 echo "When someone successfully logins it will say Welcome to the network_name network"
 read -p "Enter a network name, this can be anything, it doesn't need to be your wifi name: " welcomename
+echo "Enter redirection link that will be used when they go online(DO NOT INCLUDE http:// or https://)"
+echo "It can have a webpage filename in aswell. If you don't know what to put type google.com"
+read -p "Enter a link: " redirect
+
+cat /etc/captiveportal/named.conf.header /etc/captiveportal/named.conf.footer1 /etc/captiveportal/named.conf.footer2 > /etc/bind/named.conf.local
+echo "dhcp-range=$dhcpRange,7d" >> /etc/dnsmasq.conf
+echo "portalip=$portalip" > /etc/captiveportal/config
+echo "leasetime=30d" >> /etc/captiveportal/config
 echo "welcomename=\"$welcomename\"" >> /etc/captiveportal/config
+echo "redirect=$redirect" >> /etc/captiveportal/config
+echo "features=\"renat iptables dnsmasq-dhcp\"" >> /etc/captiveportal/config
+cp bind-db /etc/bind/db.catchall
+echo "* IN A $portalip" >> /etc/bind/db.catchall
 echo "The next step is to disable DHCP Server on the Internet router and enable mac address filter to only allow this server to get internet."
 echo "Once done type the word \"DONE\" in uppercase lettes anything else will disable dhcp on this server"
 read ready
