@@ -23,3 +23,6 @@ location.href="/portalsuccess/?portaltrys=1";
 },10000);
 });
 }
+function agreementStart(){
+document.getElementById("a").value=agreeID;
+}
