@@ -6,41 +6,25 @@
  /etc/captiveportal/config
 
 after that execute the following command in the server shell:
-sudo captive-portal refresh
+sudo captive-portal.sh refresh
 -->
 <head>
-<!-- DO NOT REMOVE THIS COMMENT: AGREEMENT -->
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="robots" content="noindex, nofollow">
 <title>Internet agreement</title>
 <script src="/agree.js"></script>
-<script src="/jquery.js"></script>
-<script>function startup(){document.getElementById("a").value=agreeID;
-$.get("/portalhost/"+location.hostname,
-function(status){
-if(status=="Blocked"){
-document.getElementById("doc").innerHTML="This website is blocked.<br>Hostname:"+location.hostname;return;
-}
-});
-}
-function agree(o){
-if(o.value!="I Agree")return;
-location.pathname="/portallogin/agree/"+agreeID;
-}
-</script>
+<script src="/captiveportal.js"></script>
 </head>
-<body onload="startup()">
+<body onload="blockedPageStart()">
 <p><center><img src="/logo.gif" height="255px" width="255px"><br>
-<span id="doc">
 Before getting online you must agree to the following terms of service:</p>
 </center>
 <p>
 <!-- BEGIN TERMS OF SERVICE HTML -->
 
 <!-- END TERMS OF SERVICE HTML -->
-</p><input type="button" value="I Agree" onclick="agree(this)">
-</span>
+</p><input type="button" onclick="agree(this)" value="I Agree">
 </body>
 </html>
