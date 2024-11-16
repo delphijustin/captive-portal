@@ -82,6 +82,7 @@ chmod +x /usr/local/bin/mac-add
 chmod +x /usr/local/bin/captive-portal.sh
 chmod +x /usr/local/bin/natinstall
 chmod +x /usr/local/bin/cpuser
+chmod +x /etc/captiveportal/onDHCP.sh
 natinstall
 gameserver
 cp captive-portal.service /etc/systemd/system/
@@ -96,6 +97,7 @@ echo "It can have a webpage filename in aswell. If you don't know what to put ty
 read -p "Enter a link: " redirect
 
 cat /etc/captiveportal/named.conf.header /etc/captiveportal/named.conf.footer1 /etc/captiveportal/named.conf.footer2 > /etc/bind/named.conf.local
+echo "dhcp-script=/etc/captiveportal/onDHCP.sh" >> /etc/dnsmasq.conf
 echo "dhcp-range=$dhcpRange,7d" >> /etc/dnsmasq.conf
 echo "portalip=$portalip" > /etc/captiveportal/config
 echo "leasetime=30d" >> /etc/captiveportal/config
